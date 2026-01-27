@@ -9,3 +9,7 @@ obj/
 *.user
 *.suo
 .vs/
+
+# Node.js
+node_modules/
+dist/
