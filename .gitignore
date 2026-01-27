@@ -13,3 +13,4 @@ obj/
 # Node.js
 node_modules/
 dist/
+coverage/
