@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitterNet.Core", "src\Twit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitterNet.Core.Tests", "tests\TwitterNet.Core.Tests\TwitterNet.Core.Tests.csproj", "{D4E5F678-9012-3456-DEFG-23456789ABCD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services.Core", "services\core\Core\Core.csproj", "{E5F67890-1234-5678-EFAB-3456789ABCDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services.Core.Tests", "services\core\Core.Tests\Core.Tests.csproj", "{F6789012-3456-789A-BCDE-456789ABCDEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,5 +37,13 @@ Global
 		{D4E5F678-9012-3456-DEFG-23456789ABCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4E5F678-9012-3456-DEFG-23456789ABCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4E5F678-9012-3456-DEFG-23456789ABCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5F67890-1234-5678-EFAB-3456789ABCDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5F67890-1234-5678-EFAB-3456789ABCDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5F67890-1234-5678-EFAB-3456789ABCDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5F67890-1234-5678-EFAB-3456789ABCDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6789012-3456-789A-BCDE-456789ABCDEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6789012-3456-789A-BCDE-456789ABCDEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6789012-3456-789A-BCDE-456789ABCDEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6789012-3456-789A-BCDE-456789ABCDEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
