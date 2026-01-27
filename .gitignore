@@ -19,3 +19,8 @@ coverage/
 __pycache__/
 *.py[cod]
 *.pyo
+
+# Playwright
+playwright-report/
+test-results/
+playwright/.cache/
