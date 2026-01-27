@@ -1,0 +1,11 @@
+.runtime/
+.claude/
+.logs/
+.beads/
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
