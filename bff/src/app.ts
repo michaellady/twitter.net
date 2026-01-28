@@ -1,8 +1,10 @@
 import express, { Application } from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { CoreServiceClient } from './clients/CoreServiceClient';
 import { createTweetRoutes } from './routes/tweets';
 import { createFeedRoutes } from './routes/feed';
+import { createAuthRoutes } from './routes/auth';
 import { errorHandler } from './middleware/errorHandler';
 
 export interface AppConfig {
@@ -22,6 +24,7 @@ export function createApp(config: AppConfig = {}): Application {
     credentials: true,
   }));
   app.use(express.json());
+  app.use(cookieParser());
 
   // Health check
   app.get('/health', (_req, res) => {
@@ -29,6 +32,7 @@ export function createApp(config: AppConfig = {}): Application {
   });
 
   // Routes
+  app.use('/api/auth', createAuthRoutes(coreClient));
   app.use('/api/tweets', createTweetRoutes(coreClient));
   app.use('/api/feed', createFeedRoutes(coreClient));
 
