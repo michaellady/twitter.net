@@ -14,23 +14,31 @@ echo "Creating Tweets table..."
 awslocal dynamodb create-table \
     --table-name Tweets \
     --attribute-definitions \
-        AttributeName=id,AttributeType=S \
-        AttributeName=userId,AttributeType=S \
-        AttributeName=createdAt,AttributeType=S \
+        AttributeName=tweet_id,AttributeType=S \
     --key-schema \
-        AttributeName=id,KeyType=HASH \
-    --global-secondary-indexes \
-        "[{
-            \"IndexName\": \"userId-createdAt-index\",
-            \"KeySchema\": [{\"AttributeName\":\"userId\",\"KeyType\":\"HASH\"},{\"AttributeName\":\"createdAt\",\"KeyType\":\"RANGE\"}],
-            \"Projection\": {\"ProjectionType\":\"ALL\"},
-            \"ProvisionedThroughput\": {\"ReadCapacityUnits\":5,\"WriteCapacityUnits\":5}
-        }]" \
-    --provisioned-throughput \
-        ReadCapacityUnits=5,WriteCapacityUnits=5
+        AttributeName=tweet_id,KeyType=HASH \
+    --billing-mode PAY_PER_REQUEST
 
 echo "Waiting for Tweets table to be active..."
 awslocal dynamodb wait table-exists --table-name Tweets
+
+# Create Users DynamoDB table
+echo "Creating Users table..."
+awslocal dynamodb create-table \
+    --table-name Users \
+    --attribute-definitions \
+        AttributeName=PK,AttributeType=S \
+        AttributeName=SK,AttributeType=S \
+        AttributeName=username,AttributeType=S \
+    --key-schema \
+        AttributeName=PK,KeyType=HASH \
+        AttributeName=SK,KeyType=RANGE \
+    --global-secondary-indexes \
+        "[{\"IndexName\":\"username-index\",\"KeySchema\":[{\"AttributeName\":\"username\",\"KeyType\":\"HASH\"}],\"Projection\":{\"ProjectionType\":\"ALL\"}}]" \
+    --billing-mode PAY_PER_REQUEST
+
+echo "Waiting for Users table to be active..."
+awslocal dynamodb wait table-exists --table-name Users
 
 # Create S3 bucket for media (future use)
 echo "Creating media bucket..."

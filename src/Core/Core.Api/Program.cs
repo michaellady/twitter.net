@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2;
+using Amazon.Runtime;
 using Core.Domain.Interfaces;
 using Core.Domain.Services;
 using Core.Infrastructure.Repositories;
@@ -12,7 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 // Configure AWS DynamoDB
 if (builder.Environment.IsDevelopment())
 {
-    // Use LocalStack in development
+    // Use LocalStack in development with dummy credentials
     var localStackUrl = builder.Configuration["AWS:ServiceURL"] ?? "http://localhost:4566";
     builder.Services.AddSingleton<IAmazonDynamoDB>(sp =>
     {
@@ -20,7 +21,8 @@ if (builder.Environment.IsDevelopment())
         {
             ServiceURL = localStackUrl
         };
-        return new AmazonDynamoDBClient(config);
+        var credentials = new BasicAWSCredentials("test", "test");
+        return new AmazonDynamoDBClient(credentials, config);
     });
 }
 else
@@ -31,12 +33,17 @@ else
 
 // Register application services
 builder.Services.AddScoped<ITweetRepository, DynamoDbTweetRepository>();
+builder.Services.AddScoped<IUserRepository, DynamoDbUserRepository>();
 builder.Services.AddScoped<TweetService>();
+builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
 
 app.UseAuthorization();
 app.MapControllers();
+
+// Health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "core" }));
 
 app.Run();
 

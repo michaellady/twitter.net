@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Tweet } from '../types'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_BASE = import.meta.env.VITE_BFF_URL || 'http://localhost:8080'
 
 export function useTweets() {
   const [tweets, setTweets] = useState<Tweet[]>([])
