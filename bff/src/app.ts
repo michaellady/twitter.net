@@ -23,6 +23,11 @@ export function createApp(config: AppConfig = {}): Application {
   }));
   app.use(express.json());
 
+  // Health check
+  app.get('/health', (_req, res) => {
+    res.json({ status: 'healthy', service: 'bff' });
+  });
+
   // Routes
   app.use('/api/tweets', createTweetRoutes(coreClient));
   app.use('/api/feed', createFeedRoutes(coreClient));

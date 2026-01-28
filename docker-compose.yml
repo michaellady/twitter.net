@@ -19,57 +19,42 @@ services:
 
   core:
     build:
-      context: ./services/core
-      dockerfile: Dockerfile
+      context: ./src/Core
+      dockerfile: Core.Api/Dockerfile
     ports:
-      - "8081:8081"
+      - "8081:8080"
     environment:
-      - AWS_ENDPOINT=http://localstack:4566
-      - AWS_REGION=us-east-1
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
+      - AWS__ServiceURL=http://localstack:4566
+      - AWS__Region=us-east-1
+      - AWS__AccessKey=test
+      - AWS__SecretKey=test
+      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       localstack:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   bff:
     build:
-      context: ./services/bff
+      context: ./bff
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
-      - CORE_SERVICE_URL=http://core:8081
+      - CORE_SERVICE_URL=http://core:8080
+      - PORT=8080
     depends_on:
-      core:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - core
 
   frontend:
     build:
-      context: ./services/frontend
+      context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
-      - BFF_URL=http://bff:8080
+      - VITE_BFF_URL=http://localhost:8080
     depends_on:
-      bff:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - bff
 
 volumes:
   localstack-data:

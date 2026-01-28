@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Core.Api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class TweetsController : ControllerBase
 {
     private readonly TweetService _tweetService;

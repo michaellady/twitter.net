@@ -14,20 +14,10 @@ echo "Creating Tweets table..."
 awslocal dynamodb create-table \
     --table-name Tweets \
     --attribute-definitions \
-        AttributeName=id,AttributeType=S \
-        AttributeName=userId,AttributeType=S \
-        AttributeName=createdAt,AttributeType=S \
+        AttributeName=tweet_id,AttributeType=S \
     --key-schema \
-        AttributeName=id,KeyType=HASH \
-    --global-secondary-indexes \
-        "[{
-            \"IndexName\": \"userId-createdAt-index\",
-            \"KeySchema\": [{\"AttributeName\":\"userId\",\"KeyType\":\"HASH\"},{\"AttributeName\":\"createdAt\",\"KeyType\":\"RANGE\"}],
-            \"Projection\": {\"ProjectionType\":\"ALL\"},
-            \"ProvisionedThroughput\": {\"ReadCapacityUnits\":5,\"WriteCapacityUnits\":5}
-        }]" \
-    --provisioned-throughput \
-        ReadCapacityUnits=5,WriteCapacityUnits=5
+        AttributeName=tweet_id,KeyType=HASH \
+    --billing-mode PAY_PER_REQUEST
 
 echo "Waiting for Tweets table to be active..."
 awslocal dynamodb wait table-exists --table-name Tweets
