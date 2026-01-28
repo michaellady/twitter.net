@@ -51,7 +51,14 @@ builder.Services.AddScoped<IUserRepository, DynamoDbUserRepository>();
 builder.Services.AddScoped<ITimelineRepository, DynamoDbTimelineRepository>();
 builder.Services.AddScoped<IFollowRepository, DynamoDbFollowRepository>();
 builder.Services.AddScoped<ILikeRepository, DynamoDbLikeRepository>();
-builder.Services.AddScoped<IImageStorageService, S3ImageStorageService>();
+
+// Register image storage with public URL for browser access
+var s3PublicUrl = builder.Configuration["AWS:S3PublicURL"] ?? "http://localhost:4566";
+builder.Services.AddScoped<IImageStorageService>(sp =>
+{
+    var s3Client = sp.GetRequiredService<IAmazonS3>();
+    return new S3ImageStorageService(s3Client, s3PublicUrl);
+});
 
 // Register application services
 builder.Services.AddScoped<TweetService>();

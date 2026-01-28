@@ -32,7 +32,12 @@ export function useTweets() {
         throw new Error('Failed to fetch tweets')
       }
       const data = await response.json()
-      setTweets(data)
+      // Map tweetId to id for frontend compatibility
+      const mappedTweets = data.map((tweet: { tweetId: string } & Omit<Tweet, 'id'>) => ({
+        ...tweet,
+        id: tweet.tweetId,
+      }))
+      setTweets(mappedTweets)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error'))

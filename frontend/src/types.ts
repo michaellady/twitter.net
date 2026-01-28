@@ -2,6 +2,8 @@ export interface Tweet {
   id: string
   content: string
   userId: string
+  username?: string
+  displayName?: string
   createdAt: string
   imageUrl?: string
   likeCount: number

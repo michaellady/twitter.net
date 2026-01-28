@@ -39,8 +39,13 @@ export function Tweet({ tweet, onLike, onUnlike }: TweetProps) {
     <article className="p-4 border-b border-gray-200" data-testid="tweet">
       <div className="flex items-center gap-2 mb-2">
         <span className="font-bold" data-testid="tweet-user">
-          {tweet.userId}
+          {tweet.displayName || tweet.username || tweet.userId}
         </span>
+        {tweet.username && (
+          <span className="text-gray-500" data-testid="tweet-username">
+            @{tweet.username}
+          </span>
+        )}
         <span className="text-gray-500" data-testid="tweet-timestamp">
           {formatRelativeTime(tweet.createdAt)}
         </span>

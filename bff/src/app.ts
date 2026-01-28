@@ -26,7 +26,7 @@ export function createApp(config: AppConfig = {}): Application {
     origin: config.frontendOrigin || process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
     credentials: true,
   }));
-  app.use(express.json());
+  app.use(express.json({ limit: '10mb' }));
   app.use(cookieParser());
 
   // Health check

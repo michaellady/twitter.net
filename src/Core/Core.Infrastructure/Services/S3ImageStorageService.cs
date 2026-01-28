@@ -7,6 +7,7 @@ namespace Core.Infrastructure.Services;
 public class S3ImageStorageService : IImageStorageService
 {
     private readonly IAmazonS3 _s3Client;
+    private readonly string _publicBaseUrl;
     private const string BucketName = "twitter-net-media";
     private const int MaxImageSizeBytes = 5 * 1024 * 1024; // 5MB
     private static readonly HashSet<string> AllowedMimeTypes = new()
@@ -17,9 +18,10 @@ public class S3ImageStorageService : IImageStorageService
         "image/webp"
     };
 
-    public S3ImageStorageService(IAmazonS3 s3Client)
+    public S3ImageStorageService(IAmazonS3 s3Client, string? publicBaseUrl = null)
     {
         _s3Client = s3Client;
+        _publicBaseUrl = publicBaseUrl ?? _s3Client.Config.ServiceURL ?? "http://localhost:4566";
     }
 
     public async Task<string> UploadImageAsync(byte[] imageData, string tweetId, string mimeType)
@@ -40,9 +42,7 @@ public class S3ImageStorageService : IImageStorageService
 
         // Return the URL for the uploaded image
         // In production, this would be a CloudFront URL or pre-signed URL
-        // For LocalStack, we construct the URL directly
-        var serviceUrl = _s3Client.Config.ServiceURL ?? "http://localhost:4566";
-        return $"{serviceUrl}/{BucketName}/{key}";
+        return $"{_publicBaseUrl}/{BucketName}/{key}";
     }
 
     public bool IsValidImageType(string mimeType)

@@ -1,6 +1,8 @@
 export interface Tweet {
   tweetId: string;
   userId: string;
+  username?: string;
+  displayName?: string;
   content: string;
   createdAt: string;
   imageUrl?: string;
