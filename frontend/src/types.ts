@@ -4,3 +4,25 @@ export interface Tweet {
   userId: string
   createdAt: string
 }
+
+export interface User {
+  userId: string
+  username: string
+  displayName: string
+  createdAt: string
+}
+
+export interface Follow {
+  followerId: string
+  followingId: string
+  createdAt: string
+}
+
+export interface FollowCounts {
+  followerCount: number
+  followingCount: number
+}
+
+export interface FollowStatus {
+  isFollowing: boolean
+}
