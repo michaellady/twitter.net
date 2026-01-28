@@ -40,3 +40,18 @@ export interface JwtPayload {
   userId: string;
   username: string;
 }
+
+export interface Follow {
+  followerId: string;
+  followingId: string;
+  createdAt: string;
+}
+
+export interface FollowCounts {
+  followerCount: number;
+  followingCount: number;
+}
+
+export interface FollowStatus {
+  isFollowing: boolean;
+}

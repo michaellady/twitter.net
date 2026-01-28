@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import { Tweet, User } from '../types';
+import { Tweet, User, Follow, FollowCounts, FollowStatus } from '../types';
 
 interface CoreUserResponse {
   userId: string;
@@ -109,6 +109,92 @@ export class CoreServiceClient {
         if (error.response?.status === 404) {
           return null;
         }
+        throw new Error(`Core service error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  async followUser(followerId: string, followingId: string): Promise<Follow> {
+    try {
+      const response = await this.client.post<Follow>(`/api/users/${followingId}/follow`, {
+        followerId,
+      });
+      return response.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 400) {
+          throw new Error(error.response.data?.error || 'Invalid request');
+        }
+        if (error.response?.status === 409) {
+          throw new Error(error.response.data?.error || 'Already following this user');
+        }
+        throw new Error(`Core service error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  async unfollowUser(followerId: string, followingId: string): Promise<void> {
+    try {
+      await this.client.delete(`/api/users/${followingId}/follow`, {
+        data: { followerId },
+      });
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 400) {
+          throw new Error(error.response.data?.error || 'Invalid request');
+        }
+        throw new Error(`Core service error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  async getFollowers(userId: string): Promise<Follow[]> {
+    try {
+      const response = await this.client.get<Follow[]>(`/api/users/${userId}/followers`);
+      return response.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new Error(`Core service error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  async getFollowing(userId: string): Promise<Follow[]> {
+    try {
+      const response = await this.client.get<Follow[]>(`/api/users/${userId}/following`);
+      return response.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new Error(`Core service error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  async getFollowStatus(userId: string, followerId: string): Promise<FollowStatus> {
+    try {
+      const response = await this.client.get<FollowStatus>(
+        `/api/users/${userId}/follow-status?followerId=${followerId}`
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new Error(`Core service error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  async getFollowCounts(userId: string): Promise<FollowCounts> {
+    try {
+      const response = await this.client.get<FollowCounts>(`/api/users/${userId}/follow-counts`);
+      return response.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
         throw new Error(`Core service error: ${error.message}`);
       }
       throw error;

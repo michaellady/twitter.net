@@ -34,8 +34,10 @@ else
 // Register application services
 builder.Services.AddScoped<ITweetRepository, DynamoDbTweetRepository>();
 builder.Services.AddScoped<IUserRepository, DynamoDbUserRepository>();
+builder.Services.AddScoped<IFollowRepository, DynamoDbFollowRepository>();
 builder.Services.AddScoped<TweetService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<FollowService>();
 
 var app = builder.Build();
 
