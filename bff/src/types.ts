@@ -4,6 +4,8 @@ export interface Tweet {
   content: string;
   createdAt: string;
   imageUrl?: string;
+  likeCount: number;
+  isLikedByCurrentUser: boolean;
 }
 
 export interface CreateTweetRequest {
@@ -63,4 +65,9 @@ export interface FollowStatus {
 export interface TimelineResponse {
   tweets: Tweet[];
   nextCursor: string | null;
+}
+
+export interface LikeResponse {
+  liked: boolean;
+  likeCount: number;
 }

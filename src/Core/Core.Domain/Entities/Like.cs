@@ -1,11 +1,8 @@
 namespace Core.Domain.Entities;
 
-public class Tweet
+public class Like
 {
     public string TweetId { get; set; } = string.Empty;
     public string UserId { get; set; } = string.Empty;
-    public string Content { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public string? ImageUrl { get; set; }
-    public int LikeCount { get; set; }
 }

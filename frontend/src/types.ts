@@ -4,6 +4,13 @@ export interface Tweet {
   userId: string
   createdAt: string
   imageUrl?: string
+  likeCount: number
+  isLikedByCurrentUser: boolean
+}
+
+export interface LikeResponse {
+  liked: boolean
+  likeCount: number
 }
 
 export interface User {

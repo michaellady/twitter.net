@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { Tweet } from '../types'
+import type { Tweet, LikeResponse } from '../types'
 
 const API_BASE = import.meta.env.VITE_BFF_URL || 'http://localhost:8080'
 
@@ -25,7 +25,9 @@ export function useTweets() {
 
   const fetchTweets = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/feed`)
+      const response = await fetch(`${API_BASE}/api/feed`, {
+        credentials: 'include',
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch tweets')
       }
@@ -70,11 +72,61 @@ export function useTweets() {
     await fetchTweets()
   }, [fetchTweets])
 
+  const likeTweet = useCallback(async (tweetId: string) => {
+    const response = await fetch(`${API_BASE}/api/tweets/${tweetId}/like`, {
+      method: 'POST',
+      credentials: 'include',
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to like tweet')
+    }
+
+    const result: LikeResponse = await response.json()
+
+    // Update tweet in state optimistically
+    setTweets(prevTweets =>
+      prevTweets.map(tweet =>
+        tweet.id === tweetId
+          ? { ...tweet, likeCount: result.likeCount, isLikedByCurrentUser: result.liked }
+          : tweet
+      )
+    )
+
+    return result
+  }, [])
+
+  const unlikeTweet = useCallback(async (tweetId: string) => {
+    const response = await fetch(`${API_BASE}/api/tweets/${tweetId}/like`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to unlike tweet')
+    }
+
+    const result: LikeResponse = await response.json()
+
+    // Update tweet in state optimistically
+    setTweets(prevTweets =>
+      prevTweets.map(tweet =>
+        tweet.id === tweetId
+          ? { ...tweet, likeCount: result.likeCount, isLikedByCurrentUser: result.liked }
+          : tweet
+      )
+    )
+
+    return result
+  }, [])
+
   return {
     tweets,
     isLoading,
     error,
     postTweet,
+    likeTweet,
+    unlikeTweet,
     refetch: fetchTweets,
   }
 }

@@ -50,6 +50,7 @@ builder.Services.AddScoped<ITweetRepository, DynamoDbTweetRepository>();
 builder.Services.AddScoped<IUserRepository, DynamoDbUserRepository>();
 builder.Services.AddScoped<ITimelineRepository, DynamoDbTimelineRepository>();
 builder.Services.AddScoped<IFollowRepository, DynamoDbFollowRepository>();
+builder.Services.AddScoped<ILikeRepository, DynamoDbLikeRepository>();
 builder.Services.AddScoped<IImageStorageService, S3ImageStorageService>();
 
 // Register application services
@@ -57,6 +58,7 @@ builder.Services.AddScoped<TweetService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<TimelineService>();
 builder.Services.AddScoped<FollowService>();
+builder.Services.AddScoped<LikeService>();
 
 var app = builder.Build();
 

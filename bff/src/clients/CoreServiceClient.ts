@@ -1,11 +1,26 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import { Tweet, User, Follow, FollowCounts, FollowStatus } from '../types';
+import { Tweet, User, Follow, FollowCounts, FollowStatus, LikeResponse } from '../types';
 
 interface CoreUserResponse {
   userId: string;
   username: string;
   displayName: string;
   createdAt: string;
+}
+
+interface CoreTweetResponse {
+  tweetId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+  imageUrl?: string;
+  likeCount: number;
+  isLikedByCurrentUser: boolean;
+}
+
+interface CoreLikeResponse {
+  liked: boolean;
+  likeCount: number;
 }
 
 export class CoreServiceClient {
@@ -33,8 +48,16 @@ export class CoreServiceClient {
         payload.imageBase64 = imageBase64;
         payload.imageMimeType = imageMimeType;
       }
-      const response = await this.client.post<Tweet>('/api/tweets', payload);
-      return response.data;
+      const response = await this.client.post<CoreTweetResponse>('/api/tweets', payload);
+      return {
+        tweetId: response.data.tweetId,
+        userId: response.data.userId,
+        content: response.data.content,
+        createdAt: response.data.createdAt,
+        imageUrl: response.data.imageUrl,
+        likeCount: response.data.likeCount || 0,
+        isLikedByCurrentUser: response.data.isLikedByCurrentUser || false,
+      };
     } catch (error) {
       if (error instanceof AxiosError) {
         throw new Error(`Core service error: ${error.message}`);
@@ -43,10 +66,19 @@ export class CoreServiceClient {
     }
   }
 
-  async getTweets(): Promise<Tweet[]> {
+  async getTweets(currentUserId?: string): Promise<Tweet[]> {
     try {
-      const response = await this.client.get<Tweet[]>('/api/tweets');
-      return response.data;
+      const params = currentUserId ? { currentUserId } : {};
+      const response = await this.client.get<CoreTweetResponse[]>('/api/tweets', { params });
+      return response.data.map(t => ({
+        tweetId: t.tweetId,
+        userId: t.userId,
+        content: t.content,
+        createdAt: t.createdAt,
+        imageUrl: t.imageUrl,
+        likeCount: t.likeCount || 0,
+        isLikedByCurrentUser: t.isLikedByCurrentUser || false,
+      }));
     } catch (error) {
       if (error instanceof AxiosError) {
         throw new Error(`Core service error: ${error.message}`);
@@ -203,6 +235,42 @@ export class CoreServiceClient {
     try {
       const response = await this.client.get<FollowCounts>(`/api/users/${userId}/follow-counts`);
       return response.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new Error(`Core service error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  async likeTweet(tweetId: string, userId: string): Promise<LikeResponse> {
+    try {
+      const response = await this.client.post<CoreLikeResponse>(
+        `/api/tweets/${tweetId}/like`,
+        { userId }
+      );
+      return {
+        liked: response.data.liked,
+        likeCount: response.data.likeCount,
+      };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new Error(`Core service error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  async unlikeTweet(tweetId: string, userId: string): Promise<LikeResponse> {
+    try {
+      const response = await this.client.delete<CoreLikeResponse>(
+        `/api/tweets/${tweetId}/like`,
+        { data: { userId } }
+      );
+      return {
+        liked: response.data.liked,
+        likeCount: response.data.likeCount,
+      };
     } catch (error) {
       if (error instanceof AxiosError) {
         throw new Error(`Core service error: ${error.message}`);

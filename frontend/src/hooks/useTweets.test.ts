@@ -3,8 +3,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { useTweets } from './useTweets'
 
 const mockTweets = [
-  { id: '1', content: 'First tweet', userId: 'user1', createdAt: new Date().toISOString() },
-  { id: '2', content: 'Second tweet', userId: 'user2', createdAt: new Date().toISOString() },
+  { id: '1', content: 'First tweet', userId: 'user1', createdAt: new Date().toISOString(), likeCount: 0, isLikedByCurrentUser: false },
+  { id: '2', content: 'Second tweet', userId: 'user2', createdAt: new Date().toISOString(), likeCount: 5, isLikedByCurrentUser: true },
 ]
 
 describe('useTweets', () => {
@@ -29,7 +29,10 @@ describe('useTweets', () => {
       expect(result.current.isLoading).toBe(false)
     })
 
-    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/api/feed'))
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/feed'),
+      expect.objectContaining({ credentials: 'include' })
+    )
     expect(result.current.tweets).toEqual(mockTweets)
   })
 
@@ -41,11 +44,11 @@ describe('useTweets', () => {
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ id: '3', content: 'New tweet' }),
+        json: () => Promise.resolve({ id: '3', content: 'New tweet', likeCount: 0, isLikedByCurrentUser: false }),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([...mockTweets, { id: '3', content: 'New tweet', userId: 'user1', createdAt: new Date().toISOString() }]),
+        json: () => Promise.resolve([...mockTweets, { id: '3', content: 'New tweet', userId: 'user1', createdAt: new Date().toISOString(), likeCount: 0, isLikedByCurrentUser: false }]),
       })
     vi.stubGlobal('fetch', mockFetch)
 
@@ -71,7 +74,7 @@ describe('useTweets', () => {
   })
 
   it('should update tweets after posting', async () => {
-    const newTweet = { id: '3', content: 'New tweet', userId: 'user1', createdAt: new Date().toISOString() }
+    const newTweet = { id: '3', content: 'New tweet', userId: 'user1', createdAt: new Date().toISOString(), likeCount: 0, isLikedByCurrentUser: false }
     const mockFetch = vi.fn()
       .mockResolvedValueOnce({
         ok: true,

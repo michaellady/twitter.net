@@ -8,10 +8,12 @@ namespace Core.Api.Controllers;
 public class TweetsController : ControllerBase
 {
     private readonly TweetService _tweetService;
+    private readonly LikeService _likeService;
 
-    public TweetsController(TweetService tweetService)
+    public TweetsController(TweetService tweetService, LikeService likeService)
     {
         _tweetService = tweetService;
+        _likeService = likeService;
     }
 
     [HttpPost]
@@ -37,7 +39,9 @@ public class TweetsController : ControllerBase
                 UserId = tweet.UserId,
                 Content = tweet.Content,
                 CreatedAt = tweet.CreatedAt,
-                ImageUrl = tweet.ImageUrl
+                ImageUrl = tweet.ImageUrl,
+                LikeCount = 0,
+                IsLikedByCurrentUser = false
             });
         }
         catch (FormatException)
@@ -51,17 +55,34 @@ public class TweetsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllTweets()
+    public async Task<IActionResult> GetAllTweets([FromQuery] string? currentUserId = null)
     {
         var tweets = await _tweetService.GetAllTweets();
-        var response = tweets.Select(t => new TweetResponse
+
+        // Get like counts and user's liked tweets if authenticated
+        var userLikedTweetIds = new HashSet<string>();
+        if (!string.IsNullOrWhiteSpace(currentUserId))
         {
-            TweetId = t.TweetId,
-            UserId = t.UserId,
-            Content = t.Content,
-            CreatedAt = t.CreatedAt,
-            ImageUrl = t.ImageUrl
-        });
+            var likedIds = await _likeService.GetUserLikedTweetIds(currentUserId);
+            userLikedTweetIds = new HashSet<string>(likedIds);
+        }
+
+        var response = new List<TweetResponse>();
+        foreach (var t in tweets)
+        {
+            var likeCount = await _likeService.GetLikeCount(t.TweetId);
+            response.Add(new TweetResponse
+            {
+                TweetId = t.TweetId,
+                UserId = t.UserId,
+                Content = t.Content,
+                CreatedAt = t.CreatedAt,
+                ImageUrl = t.ImageUrl,
+                LikeCount = likeCount,
+                IsLikedByCurrentUser = userLikedTweetIds.Contains(t.TweetId)
+            });
+        }
+
         return Ok(response);
     }
 }
@@ -81,4 +102,6 @@ public class TweetResponse
     public string Content { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public string? ImageUrl { get; set; }
+    public int LikeCount { get; set; }
+    public bool IsLikedByCurrentUser { get; set; }
 }

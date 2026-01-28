@@ -4,9 +4,11 @@ import { Tweet } from './Tweet'
 interface FeedProps {
   tweets: TweetType[]
   isLoading: boolean
+  onLike?: (tweetId: string) => void
+  onUnlike?: (tweetId: string) => void
 }
 
-export function Feed({ tweets, isLoading }: FeedProps) {
+export function Feed({ tweets, isLoading, onLike, onUnlike }: FeedProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center p-8" data-testid="loading-spinner">
@@ -26,7 +28,7 @@ export function Feed({ tweets, isLoading }: FeedProps) {
   return (
     <div data-testid="feed">
       {tweets.map((tweet) => (
-        <Tweet key={tweet.id} tweet={tweet} />
+        <Tweet key={tweet.id} tweet={tweet} onLike={onLike} onUnlike={onUnlike} />
       ))}
     </div>
   )
