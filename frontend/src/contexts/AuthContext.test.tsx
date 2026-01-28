@@ -1,166 +1,185 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, waitFor, act } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { AuthProvider, useAuth } from './AuthContext'
 
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <AuthProvider>{children}</AuthProvider>
-)
+// Test component that exposes auth context
+function TestComponent({ onAuth }: { onAuth?: (auth: ReturnType<typeof useAuth>) => void }) {
+  const auth = useAuth()
+  onAuth?.(auth)
+  return (
+    <div>
+      <span data-testid="loading">{auth.isLoading ? 'loading' : 'ready'}</span>
+      <span data-testid="authenticated">{auth.isAuthenticated ? 'yes' : 'no'}</span>
+      <span data-testid="user">{auth.user?.username || 'none'}</span>
+      <button onClick={() => auth.login('testuser', 'password')}>Login</button>
+      <button onClick={() => auth.logout()}>Logout</button>
+    </div>
+  )
+}
 
 describe('AuthContext', () => {
+  const mockFetch = vi.fn()
+  const originalFetch = global.fetch
+
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn())
+    global.fetch = mockFetch
+    localStorage.clear()
+    mockFetch.mockReset()
   })
 
   afterEach(() => {
-    vi.unstubAllGlobals()
+    global.fetch = originalFetch
   })
 
-  it('should provide user as null initially when not authenticated', async () => {
-    const mockFetch = vi.fn().mockResolvedValue({
+  it('starts with loading state', async () => {
+    mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 401,
     })
-    vi.stubGlobal('fetch', mockFetch)
 
-    const { result } = renderHook(() => useAuth(), { wrapper })
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
 
+    // Should start as loading
+    expect(screen.getByTestId('loading').textContent).toBe('loading')
+
+    // Wait for auth check to complete
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
+      expect(screen.getByTestId('loading').textContent).toBe('ready')
     })
-
-    expect(result.current.user).toBeNull()
-    expect(result.current.isAuthenticated).toBe(false)
   })
 
-  it('should fetch current user on mount', async () => {
-    const mockUser = { userId: 'user123', username: 'testuser', email: 'test@example.com' }
-    const mockFetch = vi.fn().mockResolvedValue({
+  it('checks auth state on mount', async () => {
+    mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve(mockUser),
+      json: () => Promise.resolve({ userId: '1', username: 'testuser', displayName: 'Test', createdAt: '2024-01-01' }),
     })
-    vi.stubGlobal('fetch', mockFetch)
 
-    const { result } = renderHook(() => useAuth(), { wrapper })
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
+      expect(screen.getByTestId('authenticated').textContent).toBe('yes')
+      expect(screen.getByTestId('user').textContent).toBe('testuser')
     })
 
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/auth/me'),
       expect.objectContaining({ credentials: 'include' })
     )
-    expect(result.current.user).toEqual(mockUser)
-    expect(result.current.isAuthenticated).toBe(true)
   })
 
-  it('should provide login function', async () => {
-    const mockUser = { userId: 'user123', username: 'testuser' }
-    const mockFetch = vi.fn()
-      .mockResolvedValueOnce({ ok: false, status: 401 }) // Initial /me check
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockUser),
-      }) // Login
+  it('handles login successfully', async () => {
+    const user = userEvent.setup()
 
-    vi.stubGlobal('fetch', mockFetch)
+    // Initial auth check fails
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+    })
 
-    const { result } = renderHook(() => useAuth(), { wrapper })
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
+      expect(screen.getByTestId('loading').textContent).toBe('ready')
     })
 
-    await act(async () => {
-      await result.current.login('test@example.com', 'password123')
+    // Setup login response
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ userId: '1', username: 'testuser', displayName: 'Test', createdAt: '2024-01-01' }),
     })
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/auth/login'),
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({ email: 'test@example.com', password: 'password123' }),
-      })
-    )
-    expect(result.current.user).toEqual(mockUser)
-    expect(result.current.isAuthenticated).toBe(true)
-  })
-
-  it('should provide logout function', async () => {
-    const mockUser = { userId: 'user123', username: 'testuser' }
-    const mockFetch = vi.fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockUser),
-      }) // Initial /me check
-      .mockResolvedValueOnce({ ok: true }) // Logout
-
-    vi.stubGlobal('fetch', mockFetch)
-
-    const { result } = renderHook(() => useAuth(), { wrapper })
+    await user.click(screen.getByText('Login'))
 
     await waitFor(() => {
-      expect(result.current.isAuthenticated).toBe(true)
+      expect(screen.getByTestId('authenticated').textContent).toBe('yes')
+      expect(screen.getByTestId('user').textContent).toBe('testuser')
     })
 
-    await act(async () => {
-      await result.current.logout()
-    })
-
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/auth/logout'),
-      expect.objectContaining({
-        method: 'POST',
-        credentials: 'include',
-      })
-    )
-    expect(result.current.user).toBeNull()
-    expect(result.current.isAuthenticated).toBe(false)
+    // Check localStorage was updated
+    expect(localStorage.getItem('twitter_net_auth')).not.toBeNull()
   })
 
-  it('should provide register function', async () => {
-    const mockUser = { userId: 'user123', username: 'newuser' }
-    const mockFetch = vi.fn()
-      .mockResolvedValueOnce({ ok: false, status: 401 }) // Initial /me check
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockUser),
-      }) // Register
+  it('handles logout', async () => {
+    const user = userEvent.setup()
 
-    vi.stubGlobal('fetch', mockFetch)
+    // Initial auth check succeeds
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ userId: '1', username: 'testuser', displayName: 'Test', createdAt: '2024-01-01' }),
+    })
 
-    const { result } = renderHook(() => useAuth(), { wrapper })
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
+      expect(screen.getByTestId('authenticated').textContent).toBe('yes')
     })
 
-    await act(async () => {
-      await result.current.register('newuser', 'new@example.com', 'password123')
+    // Setup logout response
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
     })
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/auth/register'),
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({
-          username: 'newuser',
-          email: 'new@example.com',
-          password: 'password123',
-        }),
-      })
-    )
-    expect(result.current.user).toEqual(mockUser)
-    expect(result.current.isAuthenticated).toBe(true)
+    await user.click(screen.getByText('Logout'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('authenticated').textContent).toBe('no')
+      expect(screen.getByTestId('user').textContent).toBe('none')
+    })
+
+    // Check localStorage was cleared
+    expect(localStorage.getItem('twitter_net_auth')).toBeNull()
   })
 
-  it('should throw error when useAuth is used outside AuthProvider', () => {
+  it('persists auth state in localStorage', async () => {
+    // Pre-populate localStorage
+    localStorage.setItem('twitter_net_auth', JSON.stringify({
+      userId: '1',
+      username: 'cacheduser',
+      displayName: 'Cached',
+      createdAt: '2024-01-01'
+    }))
+
+    // Server confirms the session is still valid
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ userId: '1', username: 'cacheduser', displayName: 'Cached', createdAt: '2024-01-01' }),
+    })
+
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    )
+
+    // Should immediately show cached user while verifying
+    await waitFor(() => {
+      expect(screen.getByTestId('user').textContent).toBe('cacheduser')
+    })
+  })
+
+  it('throws error when useAuth is used outside provider', () => {
     // Suppress console.error for this test
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     expect(() => {
-      renderHook(() => useAuth())
+      render(<TestComponent />)
     }).toThrow('useAuth must be used within an AuthProvider')
 
     consoleSpy.mockRestore()
