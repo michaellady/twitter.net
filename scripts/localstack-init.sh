@@ -45,13 +45,15 @@ echo "Creating Follows table..."
 awslocal dynamodb create-table \
     --table-name Follows \
     --attribute-definitions \
-        AttributeName=follower_id,AttributeType=S \
-        AttributeName=following_id,AttributeType=S \
+        AttributeName=PK,AttributeType=S \
+        AttributeName=SK,AttributeType=S \
+        AttributeName=GSI1PK,AttributeType=S \
+        AttributeName=GSI1SK,AttributeType=S \
     --key-schema \
-        AttributeName=follower_id,KeyType=HASH \
-        AttributeName=following_id,KeyType=RANGE \
+        AttributeName=PK,KeyType=HASH \
+        AttributeName=SK,KeyType=RANGE \
     --global-secondary-indexes \
-        "[{\"IndexName\":\"followers-index\",\"KeySchema\":[{\"AttributeName\":\"following_id\",\"KeyType\":\"HASH\"},{\"AttributeName\":\"follower_id\",\"KeyType\":\"RANGE\"}],\"Projection\":{\"ProjectionType\":\"ALL\"}}]" \
+        "[{\"IndexName\":\"followers-index\",\"KeySchema\":[{\"AttributeName\":\"GSI1PK\",\"KeyType\":\"HASH\"},{\"AttributeName\":\"GSI1SK\",\"KeyType\":\"RANGE\"}],\"Projection\":{\"ProjectionType\":\"ALL\"}}]" \
     --billing-mode PAY_PER_REQUEST
 
 echo "Waiting for Follows table to be active..."

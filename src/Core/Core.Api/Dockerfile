@@ -13,8 +13,8 @@ RUN dotnet restore
 # Copy source code
 COPY . .
 
-# Build
-RUN dotnet build -c Release --no-restore
+# Build (restore again to ensure all packages are available)
+RUN dotnet restore && dotnet build -c Release --no-restore
 
 # Publish
 RUN dotnet publish Core.Api/Core.Api.csproj -c Release -o /app/publish --no-build

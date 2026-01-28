@@ -18,7 +18,7 @@ describe('TweetComposer', () => {
     const input = screen.getByTestId('tweet-input')
     await user.type(input, 'Hello')
 
-    expect(screen.getByTestId('char-count')).toHaveTextContent('5/140')
+    expect(screen.getByTestId('char-counter')).toHaveTextContent('5/140')
   })
 
   it('should disable button when empty', () => {
