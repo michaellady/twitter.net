@@ -21,9 +21,19 @@ export class CoreServiceClient {
     });
   }
 
-  async postTweet(content: string, userId: string = 'user-1'): Promise<Tweet> {
+  async postTweet(
+    content: string,
+    userId: string = 'user-1',
+    imageBase64?: string,
+    imageMimeType?: string
+  ): Promise<Tweet> {
     try {
-      const response = await this.client.post<Tweet>('/api/tweets', { content, userId });
+      const payload: Record<string, string | undefined> = { content, userId };
+      if (imageBase64 && imageMimeType) {
+        payload.imageBase64 = imageBase64;
+        payload.imageMimeType = imageMimeType;
+      }
+      const response = await this.client.post<Tweet>('/api/tweets', payload);
       return response.data;
     } catch (error) {
       if (error instanceof AxiosError) {

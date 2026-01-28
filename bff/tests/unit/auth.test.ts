@@ -66,8 +66,9 @@ describe('Auth Routes', () => {
         })
         .expect(201);
 
-      const cookies = response.headers['set-cookie'];
-      expect(cookies).toBeDefined();
+      const cookieHeader = response.headers['set-cookie'];
+      expect(cookieHeader).toBeDefined();
+      const cookies = Array.isArray(cookieHeader) ? cookieHeader : [cookieHeader];
       expect(cookies.some((c: string) => c.includes('auth_token'))).toBe(true);
       expect(cookies.some((c: string) => c.includes('refresh_token'))).toBe(true);
       expect(cookies.some((c: string) => c.includes('HttpOnly'))).toBe(true);
@@ -141,8 +142,9 @@ describe('Auth Routes', () => {
         })
         .expect(200);
 
-      const cookies = response.headers['set-cookie'];
-      expect(cookies).toBeDefined();
+      const cookieHeader = response.headers['set-cookie'];
+      expect(cookieHeader).toBeDefined();
+      const cookies = Array.isArray(cookieHeader) ? cookieHeader : [cookieHeader];
       expect(cookies.some((c: string) => c.includes('auth_token'))).toBe(true);
     });
 
@@ -178,9 +180,10 @@ describe('Auth Routes', () => {
 
       expect(response.body).toEqual({ success: true });
 
-      const cookies = response.headers['set-cookie'];
-      if (cookies) {
+      const cookieHeader = response.headers['set-cookie'];
+      if (cookieHeader) {
         // Check that cookies are cleared (expires in the past)
+        const cookies = Array.isArray(cookieHeader) ? cookieHeader : [cookieHeader];
         expect(cookies.some((c: string) => c.includes('auth_token=;'))).toBe(true);
       }
     });

@@ -2,10 +2,13 @@ export interface Tweet {
   id: string;
   content: string;
   createdAt: string;
+  imageUrl?: string;
 }
 
 export interface CreateTweetRequest {
   content: string;
+  imageBase64?: string;
+  imageMimeType?: string;
 }
 
 export interface ErrorResponse {

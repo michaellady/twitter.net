@@ -48,7 +48,7 @@ describe('POST /api/tweets', () => {
       .send({ content: 'Hello world' })
       .expect(201);
 
-    expect(mockPostTweet).toHaveBeenCalledWith('Hello world', 'user-123');
+    expect(mockPostTweet).toHaveBeenCalledWith('Hello world', 'user-123', undefined, undefined);
   });
 
   it('should return created tweet', async () => {

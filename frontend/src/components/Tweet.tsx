@@ -38,6 +38,14 @@ export function Tweet({ tweet }: TweetProps) {
       <p className="text-gray-900" data-testid="tweet-content">
         {tweet.content}
       </p>
+      {tweet.imageUrl && (
+        <img
+          src={tweet.imageUrl}
+          alt="Tweet image"
+          className="mt-2 rounded-lg max-w-full max-h-96 object-contain"
+          data-testid="tweet-image"
+        />
+      )}
     </article>
   )
 }

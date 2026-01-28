@@ -19,14 +19,30 @@ public class TweetsController : ControllerBase
     {
         try
         {
-            var tweet = await _tweetService.CreateTweet(request.UserId, request.Content);
+            byte[]? imageData = null;
+            if (!string.IsNullOrEmpty(request.ImageBase64))
+            {
+                imageData = Convert.FromBase64String(request.ImageBase64);
+            }
+
+            var tweet = await _tweetService.CreateTweet(
+                request.UserId,
+                request.Content,
+                imageData,
+                request.ImageMimeType);
+
             return StatusCode(201, new TweetResponse
             {
                 TweetId = tweet.TweetId,
                 UserId = tweet.UserId,
                 Content = tweet.Content,
-                CreatedAt = tweet.CreatedAt
+                CreatedAt = tweet.CreatedAt,
+                ImageUrl = tweet.ImageUrl
             });
+        }
+        catch (FormatException)
+        {
+            return BadRequest(new { error = "Invalid base64 image data" });
         }
         catch (ArgumentException ex)
         {
@@ -43,7 +59,8 @@ public class TweetsController : ControllerBase
             TweetId = t.TweetId,
             UserId = t.UserId,
             Content = t.Content,
-            CreatedAt = t.CreatedAt
+            CreatedAt = t.CreatedAt,
+            ImageUrl = t.ImageUrl
         });
         return Ok(response);
     }
@@ -53,6 +70,8 @@ public class CreateTweetRequest
 {
     public string UserId { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
+    public string? ImageBase64 { get; set; }
+    public string? ImageMimeType { get; set; }
 }
 
 public class TweetResponse
@@ -61,4 +80,5 @@ public class TweetResponse
     public string UserId { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+    public string? ImageUrl { get; set; }
 }

@@ -25,6 +25,12 @@ public class DynamoDbTweetRepository : ITweetRepository
             ["created_at"] = new AttributeValue { S = tweet.CreatedAt.ToString("O") }
         };
 
+        // Only add image_url if it's not null
+        if (!string.IsNullOrEmpty(tweet.ImageUrl))
+        {
+            item["image_url"] = new AttributeValue { S = tweet.ImageUrl };
+        }
+
         var request = new PutItemRequest
         {
             TableName = TableName,
@@ -50,7 +56,8 @@ public class DynamoDbTweetRepository : ITweetRepository
             TweetId = item["tweet_id"].S,
             UserId = item["user_id"].S,
             Content = item["content"].S,
-            CreatedAt = DateTime.Parse(item["created_at"].S)
+            CreatedAt = DateTime.Parse(item["created_at"].S),
+            ImageUrl = item.TryGetValue("image_url", out var imageUrl) ? imageUrl.S : null
         });
 
         return tweets.OrderByDescending(t => t.CreatedAt);

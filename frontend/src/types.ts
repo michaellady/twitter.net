@@ -3,6 +3,7 @@ export interface Tweet {
   content: string
   userId: string
   createdAt: string
+  imageUrl?: string
 }
 
 export interface User {
