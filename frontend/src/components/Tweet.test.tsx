@@ -18,6 +18,8 @@ describe('Tweet', () => {
       content: 'Hello, Twitter!',
       userId: 'user123',
       createdAt: new Date().toISOString(),
+      likeCount: 0,
+      isLikedByCurrentUser: false,
     }
 
     render(<Tweet tweet={tweet} />)
@@ -32,6 +34,8 @@ describe('Tweet', () => {
       content: 'Test tweet',
       userId: 'user123',
       createdAt: twoMinutesAgo,
+      likeCount: 0,
+      isLikedByCurrentUser: false,
     }
 
     render(<Tweet tweet={tweet} />)
@@ -45,6 +49,8 @@ describe('Tweet', () => {
       content: 'Test tweet',
       userId: 'johndoe',
       createdAt: new Date().toISOString(),
+      likeCount: 0,
+      isLikedByCurrentUser: false,
     }
 
     render(<Tweet tweet={tweet} />)

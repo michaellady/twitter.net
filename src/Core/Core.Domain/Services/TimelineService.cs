@@ -37,9 +37,9 @@ public class TimelineService
         }
 
         // Create timeline entries for each follower
-        var entries = followerList.Select(followerId => new TimelineEntry
+        var entries = followerList.Select(follow => new TimelineEntry
         {
-            UserId = followerId,
+            UserId = follow.FollowerId,
             TweetId = tweet.TweetId,
             AuthorId = tweet.UserId,
             CreatedAt = tweet.CreatedAt

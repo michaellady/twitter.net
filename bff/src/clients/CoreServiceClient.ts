@@ -23,6 +23,16 @@ interface CoreLikeResponse {
   likeCount: number;
 }
 
+interface CoreTimelineResponse {
+  tweets: CoreTweetResponse[];
+  nextCursor: string | null;
+}
+
+interface TimelineResult {
+  tweets: Tweet[];
+  nextCursor: string | null;
+}
+
 export class CoreServiceClient {
   private client: AxiosInstance;
 
@@ -270,6 +280,36 @@ export class CoreServiceClient {
       return {
         liked: response.data.liked,
         likeCount: response.data.likeCount,
+      };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new Error(`Core service error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  async getTimeline(userId: string, cursor?: string, limit: number = 20): Promise<TimelineResult> {
+    try {
+      const params: Record<string, string | number> = { limit };
+      if (cursor) {
+        params.cursor = cursor;
+      }
+      const response = await this.client.get<CoreTimelineResponse>(
+        `/Timeline/${userId}`,
+        { params }
+      );
+      return {
+        tweets: response.data.tweets.map(t => ({
+          tweetId: t.tweetId,
+          userId: t.userId,
+          content: t.content,
+          createdAt: t.createdAt,
+          imageUrl: t.imageUrl,
+          likeCount: t.likeCount || 0,
+          isLikedByCurrentUser: t.isLikedByCurrentUser || false,
+        })),
+        nextCursor: response.data.nextCursor,
       };
     } catch (error) {
       if (error instanceof AxiosError) {

@@ -5,8 +5,8 @@ import { Feed } from './Feed'
 describe('Feed', () => {
   it('should render list of Tweet components', () => {
     const tweets = [
-      { id: '1', content: 'First tweet', userId: 'user1', createdAt: new Date().toISOString() },
-      { id: '2', content: 'Second tweet', userId: 'user2', createdAt: new Date().toISOString() },
+      { id: '1', content: 'First tweet', userId: 'user1', createdAt: new Date().toISOString(), likeCount: 0, isLikedByCurrentUser: false },
+      { id: '2', content: 'Second tweet', userId: 'user2', createdAt: new Date().toISOString(), likeCount: 0, isLikedByCurrentUser: false },
     ]
 
     render(<Feed tweets={tweets} isLoading={false} />)

@@ -82,6 +82,7 @@ export function TweetComposer({ onSubmit }: TweetComposerProps) {
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="What's happening?"
+        aria-label="Tweet"
         className="w-full p-2 border border-gray-300 rounded resize-none focus:outline-none focus:border-blue-500"
         rows={3}
         data-testid="tweet-input"
@@ -142,7 +143,7 @@ export function TweetComposer({ onSubmit }: TweetComposerProps) {
           </label>
           <span
             className={`text-sm ${isOverLimit ? 'text-red-500' : 'text-gray-500'}`}
-            data-testid="char-count"
+            data-testid="char-counter"
           >
             {charCount}/{MAX_CHARS}
           </span>

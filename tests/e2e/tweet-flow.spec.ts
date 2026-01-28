@@ -1,4 +1,34 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
+
+const BFF_URL = process.env.BFF_URL || 'http://localhost:8080';
+
+/**
+ * Helper to create a unique test user and authenticate via API
+ */
+async function authenticateUser(page: Page, username: string): Promise<void> {
+  // Register the user via API (sets httpOnly cookie)
+  const context = page.context();
+  const response = await context.request.post(`${BFF_URL}/api/auth/register`, {
+    data: {
+      username,
+      password: 'testpassword123',
+      displayName: `Test User ${username}`,
+    },
+  });
+
+  // If user already exists, try to login instead
+  if (response.status() === 409) {
+    const loginResponse = await context.request.post(`${BFF_URL}/api/auth/login`, {
+      data: {
+        username,
+        password: 'testpassword123',
+      },
+    });
+    expect(loginResponse.ok()).toBeTruthy();
+  } else {
+    expect(response.ok()).toBeTruthy();
+  }
+}
 
 /**
  * E2E test proving the complete tracer bullet:
@@ -9,6 +39,13 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('Tweet Flow', () => {
   test.beforeEach(async ({ page }) => {
+    // Create unique username for this test run
+    const uniqueId = Date.now().toString(36);
+    const username = `testuser_${uniqueId}`;
+
+    // Authenticate before navigating
+    await authenticateUser(page, username);
+
     // Navigate to the app
     await page.goto('/');
   });
