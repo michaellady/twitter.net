@@ -63,6 +63,38 @@ awslocal dynamodb wait table-exists --table-name Follows
 echo "Creating media bucket..."
 awslocal s3 mb s3://twitter-net-media 2>/dev/null || true
 
+# Create Timeline DynamoDB table (for fanout-on-write)
+echo "Creating Timeline table..."
+awslocal dynamodb create-table \
+    --table-name Timeline \
+    --attribute-definitions \
+        AttributeName=user_id,AttributeType=S \
+        AttributeName=tweet_id,AttributeType=S \
+    --key-schema \
+        AttributeName=user_id,KeyType=HASH \
+        AttributeName=tweet_id,KeyType=RANGE \
+    --billing-mode PAY_PER_REQUEST
+
+echo "Waiting for Timeline table to be active..."
+awslocal dynamodb wait table-exists --table-name Timeline
+
+# Create Follows DynamoDB table
+echo "Creating Follows table..."
+awslocal dynamodb create-table \
+    --table-name Follows \
+    --attribute-definitions \
+        AttributeName=follower_id,AttributeType=S \
+        AttributeName=following_id,AttributeType=S \
+    --key-schema \
+        AttributeName=follower_id,KeyType=HASH \
+        AttributeName=following_id,KeyType=RANGE \
+    --global-secondary-indexes \
+        "[{\"IndexName\":\"followers-index\",\"KeySchema\":[{\"AttributeName\":\"following_id\",\"KeyType\":\"HASH\"},{\"AttributeName\":\"follower_id\",\"KeyType\":\"RANGE\"}],\"Projection\":{\"ProjectionType\":\"ALL\"}}]" \
+    --billing-mode PAY_PER_REQUEST
+
+echo "Waiting for Follows table to be active..."
+awslocal dynamodb wait table-exists --table-name Follows
+
 echo "LocalStack initialization complete!"
 echo "Resources created:"
 awslocal dynamodb list-tables

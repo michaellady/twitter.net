@@ -1,5 +1,6 @@
 export interface Tweet {
-  id: string;
+  tweetId: string;
+  userId: string;
   content: string;
   createdAt: string;
   imageUrl?: string;
@@ -57,4 +58,9 @@ export interface FollowCounts {
 
 export interface FollowStatus {
   isFollowing: boolean;
+}
+
+export interface TimelineResponse {
+  tweets: Tweet[];
+  nextCursor: string | null;
 }

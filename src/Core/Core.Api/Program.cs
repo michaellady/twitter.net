@@ -45,13 +45,17 @@ else
     builder.Services.AddAWSService<IAmazonS3>();
 }
 
-// Register application services
+// Register repositories
 builder.Services.AddScoped<ITweetRepository, DynamoDbTweetRepository>();
 builder.Services.AddScoped<IUserRepository, DynamoDbUserRepository>();
+builder.Services.AddScoped<ITimelineRepository, DynamoDbTimelineRepository>();
 builder.Services.AddScoped<IFollowRepository, DynamoDbFollowRepository>();
 builder.Services.AddScoped<IImageStorageService, S3ImageStorageService>();
+
+// Register application services
 builder.Services.AddScoped<TweetService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<TimelineService>();
 builder.Services.AddScoped<FollowService>();
 
 var app = builder.Build();

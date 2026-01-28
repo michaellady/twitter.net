@@ -6,6 +6,7 @@ import { createTweetRoutes } from './routes/tweets';
 import { createFeedRoutes } from './routes/feed';
 import { createAuthRoutes } from './routes/auth';
 import { createFollowRoutes } from './routes/follows';
+import { createTimelineRoutes } from './routes/timeline';
 import { errorHandler } from './middleware/errorHandler';
 
 export interface AppConfig {
@@ -37,6 +38,7 @@ export function createApp(config: AppConfig = {}): Application {
   app.use('/api/tweets', createTweetRoutes(coreClient));
   app.use('/api/feed', createFeedRoutes(coreClient));
   app.use('/api/users', createFollowRoutes(coreClient));
+  app.use('/api/timeline', createTimelineRoutes(coreClient));
 
   // Error handling middleware (must be last)
   app.use(errorHandler);
