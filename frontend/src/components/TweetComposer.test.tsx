@@ -51,7 +51,7 @@ describe('TweetComposer', () => {
     const button = screen.getByTestId('tweet-button')
     await user.click(button)
 
-    expect(onSubmit).toHaveBeenCalledWith('Hello world!')
+    expect(onSubmit).toHaveBeenCalledWith('Hello world!', undefined)
   })
 
   it('should clear input after successful submit', async () => {
